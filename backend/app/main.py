@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
+from app.api.predictions import router as predictions_router
 
 app = FastAPI(
     title="HeartGuard Backend API",
@@ -21,6 +22,7 @@ app.add_middleware(
 )
 
 app.include_router(health_router)
+app.include_router(predictions_router)
 
 
 @app.get("/")
@@ -29,4 +31,5 @@ def root():
         "message": "Welcome to the HeartGuard Backend API",
         "docs": "/docs",
         "health": "/health",
+        "predictions": "/predictions",
     }
