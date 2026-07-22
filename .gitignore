@@ -28,6 +28,7 @@ ml/data/processed/*
 !ml/data/raw/.gitkeep
 !ml/data/processed/.gitkeep
 *.joblib
+!ml/models/heart_disease_pipeline.joblib
 *.pkl
 *.pickle
 
