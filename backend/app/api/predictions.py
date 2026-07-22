@@ -3,7 +3,10 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.dependencies import get_current_user
-from app.repositories.prediction_repository import save_prediction_record
+from app.repositories.prediction_repository import (
+    get_user_predictions,
+    save_prediction_record,
+)
 from app.schemas.prediction import PredictionInput, PredictionResponse
 from app.services.prediction_service import predict_heart_disease
 
@@ -16,7 +19,7 @@ def create_prediction(
     current_user: dict[str, Any] = Depends(get_current_user),
 ):
     """
-    Run a heart disease risk prediction for an authenticated Firebase user.
+    Run and save a heart disease risk prediction for an authenticated Firebase user.
     """
     try:
         user_id = current_user["uid"]
@@ -41,4 +44,32 @@ def create_prediction(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Prediction failed. Please try again later.",
+        ) from error
+
+
+@router.get("", status_code=status.HTTP_200_OK)
+def list_predictions(
+    current_user: dict[str, Any] = Depends(get_current_user),
+):
+    """
+    Return prediction history for the authenticated Firebase user.
+    """
+    try:
+        user_id = current_user["uid"]
+        predictions = get_user_predictions(user_id)
+
+        return {
+            "message": "Prediction history retrieved successfully.",
+            "count": len(predictions),
+            "predictions": predictions,
+        }
+    except KeyError as error:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authenticated user ID was not found.",
+        ) from error
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Prediction history could not be retrieved.",
         ) from error
