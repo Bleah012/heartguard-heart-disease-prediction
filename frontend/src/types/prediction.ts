@@ -33,6 +33,7 @@ export type PredictionRecord = PredictionInput &
   PredictionResult & {
     id?: string;
     userId: string;
+    patientName?: string | null;
     createdAt?: unknown;
   };
 
