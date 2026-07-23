@@ -24,8 +24,17 @@ export function subscribeToAuthState(callback: (user: User | null) => void) {
   return onAuthStateChanged(auth, callback);
 }
 
+function waitForCurrentUser(): Promise<User | null> {
+  return new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      resolve(user);
+    });
+  });
+}
+
 export async function getCurrentUserToken(): Promise<string | null> {
-  const user = auth.currentUser;
+  const user = auth.currentUser ?? (await waitForCurrentUser());
 
   if (!user) {
     return null;
