@@ -1,5 +1,5 @@
 import { AlertCircle, Clock3, Loader2, RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { getPredictionHistory } from "../services/api";
 import { getCurrentUserToken } from "../services/auth";
@@ -61,7 +61,7 @@ export function PredictionHistoryPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function loadHistory() {
+  const loadHistory = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage("");
 
@@ -83,11 +83,17 @@ export function PredictionHistoryPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    void loadHistory();
-  }, []);
+    const timeoutId = window.setTimeout(() => {
+      void loadHistory();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [loadHistory]);
 
   return (
     <div className="space-y-6">
